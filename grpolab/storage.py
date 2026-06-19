@@ -1,5 +1,5 @@
 import sqlite3
-
+from datetime import datetime
 class Storage:
 
     def __init__(self,db_path="data/grpolab.db"):
@@ -31,7 +31,16 @@ class Storage:
         conn.commit()
         conn.close()
     def create_run(self,run_name):
-        pass
+        conn=sqlite3.connect(self.db_path)
+        cursor=conn.cursor() 
+        cursor.execute("""
+        INSERT INTO runs (run_name,status,start_time) VALUES (?,?,?)
+        """,(run_name,"running",datetime.now().isoformat())
+        )
+        run_id=cursor.lastrowid
+        conn.commit()
+        conn.close()
+        return run_id
     def log_metrics(self,run_id,step,metrics):
         pass
     def finish_run(self,run_id):
