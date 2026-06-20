@@ -4,6 +4,7 @@ class Storage:
 
     def __init__(self,db_path="data/grpolab.db"):
         self.db_path=db_path
+        self.create_tables()
     def create_tables(self):
         conn=sqlite3.connect(self.db_path)
         cursor=conn.cursor()
@@ -42,6 +43,17 @@ class Storage:
         conn.close()
         return run_id
     def log_metrics(self,run_id,step,metrics):
-        pass
+        if not metrics:
+            return
+        conn=sqlite3.connect(self.db_path)
+        cursor=conn.cursor()
+        for key,value in metrics.items():
+            cursor.execute(
+                """
+                INSERT INTO metrics (run_id,step,key,value) VALUES (?,?,?,?)
+                """,(run_id,step,key,value)
+            )
+        conn.commit()
+        conn.close()
     def finish_run(self,run_id):
         pass

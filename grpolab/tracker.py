@@ -6,8 +6,7 @@ class GRPOTracker:
         self.run_id=self.storage.create_run(run_name)
 
     def log(self,step,metrics):
-        print(f"Step {step}")
-        print(metrics)
+        self.storage.log_metrics(self.run_id,step,metrics)
 
     def finish(self):
         print(f"Run {self.run_name} finished.")
