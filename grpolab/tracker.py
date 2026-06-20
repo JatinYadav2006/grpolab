@@ -9,4 +9,5 @@ class GRPOTracker:
         self.storage.log_metrics(self.run_id,step,metrics)
 
     def finish(self):
+        self.storage.finish_run(self.run_id)
         print(f"Run {self.run_name} finished.")

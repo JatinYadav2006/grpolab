@@ -56,4 +56,14 @@ class Storage:
         conn.commit()
         conn.close()
     def finish_run(self,run_id):
-        pass
+        conn=sqlite3.connect(self.db_path)
+        cursor=conn.cursor()
+        cursor.execute(
+            """
+            UPDATE runs
+            SET status=?, end_time=?
+            WHERE run_id=?
+            """,("completed",datetime.now().isoformat(),run_id)
+        )
+        conn.commit()
+        conn.close()
