@@ -55,6 +55,21 @@ class Storage:
             )
         conn.commit()
         conn.close()
+    def get_metrics(self,run_id,metric_name):
+        conn=sqlite3.connect(self.db_path)
+        cursor=conn.cursor()
+        cursor.execute(
+            """
+            SELECT step,value from metrics
+            WHERE run_id=? 
+            AND key=? 
+            ORDER BY step
+            """,(run_id,metric_name)
+        )
+        rows=cursor.fetchall()
+        conn.commit()
+        conn.close()
+        return rows
     def finish_run(self,run_id):
         conn=sqlite3.connect(self.db_path)
         cursor=conn.cursor()
