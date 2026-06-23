@@ -67,9 +67,35 @@ class Storage:
             """,(run_id,metric_name)
         )
         rows=cursor.fetchall()
-        conn.commit()
         conn.close()
         return rows
+    def get_runs(self):
+        conn=sqlite3.connect(self.db_path)
+        cursor=conn.cursor()
+        cursor.execute(
+            """
+            SELECT run_id, run_name, status
+            FROM runs
+            ORDER BY start_time DESC
+            """
+        )
+        rows=cursor.fetchall()
+        conn.close()
+        return rows
+    def get_metric_names(self,run_id):
+        conn=sqlite3.connect(self.db_path)
+        cursor=conn.cursor()
+        cursor.execute(
+            """
+            SELECT DISTINCT key
+            FROM metrics
+            WHERE run_id = ?
+            """,(run_id,)
+        )
+        rows=cursor.fetchall()
+        metric_names= [row[0] for row in rows]
+        conn.close()
+        return metric_names
     def finish_run(self,run_id):
         conn=sqlite3.connect(self.db_path)
         cursor=conn.cursor()
