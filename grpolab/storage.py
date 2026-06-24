@@ -96,6 +96,19 @@ class Storage:
         metric_names= [row[0] for row in rows]
         conn.close()
         return metric_names
+    def get_run_details(self,run_id):
+        conn=sqlite3.connect(self.db_path)
+        cursor=conn.cursor()
+        cursor.execute(
+            """
+            SELECT run_id, run_name, status, start_time, end_time
+            FROM runs
+            WHERE run_id=?  
+            """, (run_id,)
+        )
+        row=cursor.fetchone()
+        conn.close()
+        return row
     def finish_run(self,run_id):
         conn=sqlite3.connect(self.db_path)
         cursor=conn.cursor()
