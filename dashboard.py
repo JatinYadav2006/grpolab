@@ -2,7 +2,7 @@ import streamlit as st
 import matplotlib.pyplot as plt
 from grpolab.storage import Storage
 from grpolab.visualization import Visualizer
-
+from grpolab.analysis import Analyzer
 
 def format_run_option(run):
     run_id, run_name, status = run
@@ -40,7 +40,7 @@ def main():
     st.caption("GRPO Experiment Tracking Dashboard")
 
     storage = Storage()
-    visualizer = Visualizer()
+    visualizer = Visualizer(storage)
     runs = storage.get_runs()
 
     if not runs:

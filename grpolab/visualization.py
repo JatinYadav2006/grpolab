@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 
 class Visualizer:
 
-    def __init__(self):
-        self.storage = Storage()
+    def __init__(self,storage):
+        self.storage = storage
 
     def plot_metric(
         self,
