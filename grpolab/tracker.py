@@ -7,6 +7,13 @@ class GRPOTracker:
 
     def log(self,step,metrics):
         self.storage.log_metrics(self.run_id,step,metrics)
+    def log_rollouts(self, step, group_id, rewards):
+        self.storage.log_rollouts(
+            run_id=self.run_id, 
+            step=step, 
+            group_id=group_id, 
+            rewards=rewards
+        )
 
     def finish(self):
         self.storage.finish_run(self.run_id)
