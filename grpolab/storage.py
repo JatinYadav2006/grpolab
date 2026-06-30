@@ -35,6 +35,7 @@ class Storage:
             step INTEGER,
             group_id INTEGER,
             rollout_id INTEGER,
+            prompt TEXT,
             reward REAL,
             response_text TEXT,
             PRIMARY KEY (run_id, group_id, rollout_id),
@@ -72,6 +73,7 @@ class Storage:
         run_id,
         step,
         group_id,
+        prompt,
         rewards,
         responses,
     ):
@@ -84,6 +86,7 @@ class Storage:
                 step,
                 group_id,
                 i + 1,
+                prompt,
                 reward,
                 response,
             )
@@ -91,6 +94,7 @@ class Storage:
                 zip(rewards, responses)
             )
         ]
+
         cursor.executemany(
             """
             INSERT INTO rollouts
@@ -99,15 +103,17 @@ class Storage:
                 step,
                 group_id,
                 rollout_id,
+                prompt,
                 reward,
                 response_text
             )
-            VALUES (?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             """,
             data,
         )
         conn.commit()
-        conn.close()   
+        conn.close()
+
     def get_metrics(self,run_id,metric_name):
         conn=sqlite3.connect(self.db_path)
         cursor=conn.cursor()
@@ -168,10 +174,12 @@ class Storage:
 
         cursor.execute(
             """
-            SELECT reward, response_text
+            SELECT prompt,
+                reward,
+                response_text
             FROM rollouts
-            WHERE run_id = ?
-            AND group_id = ?
+            WHERE run_id=?
+            AND group_id=?
             ORDER BY rollout_id
             """,
             (run_id, group_id),

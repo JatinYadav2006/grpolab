@@ -1,11 +1,12 @@
 from grpolab.tracker import GRPOTracker
 from grpolab.storage import Storage
 
-tracker = GRPOTracker("response-storage-demo")
+tracker = GRPOTracker("behavior-demo")
 
 tracker.log_rollouts(
     step=1,
     group_id=1,
+    prompt="Treat a patient with tension pneumothorax.",
     rewards=[
         0.82,
         0.75,
