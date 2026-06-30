@@ -1,3 +1,4 @@
+import statistics
 class Analyzer:
     def __init__(self,storage):
         self.storage=storage
@@ -36,5 +37,28 @@ class Analyzer:
             "statistics": {
                 "best_value": best_value,
                 "best_step": best_step
+            }
+        }
+    def analyze_rollout_group(self, run_id, group_id):
+        rewards = self.storage.get_rollouts(run_id, group_id)
+
+        if not rewards:
+            return {
+                "status": "no_data",
+                "group_id": group_id,
+                "message": f"No rollouts found for group {group_id}."
+            }
+
+        variance = statistics.pvariance(rewards)
+
+        return {
+            "status": "success",
+            "group_id": group_id,
+            "statistics": {
+                "reward_variance": variance,
+                "mean_reward": statistics.mean(rewards),
+                "max_reward": max(rewards),
+                "min_reward": min(rewards),
+                "num_rollouts": len(rewards)
             }
         }
