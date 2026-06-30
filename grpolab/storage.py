@@ -31,13 +31,14 @@ class Storage:
         """)
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS rollouts(
-        run_id INTEGER,
-        step INTEGER,
-        group_id INTEGER,
-        rollout_id INTEGER,
-        reward REAL,
-        PRIMARY KEY (run_id, group_id, rollout_id),
-        FOREIGN KEY(run_id) REFERENCES runs(run_id)
+            run_id INTEGER,
+            step INTEGER,
+            group_id INTEGER,
+            rollout_id INTEGER,
+            reward REAL,
+            response_text TEXT,
+            PRIMARY KEY (run_id, group_id, rollout_id),
+            FOREIGN KEY(run_id) REFERENCES runs(run_id)
         )
         """)
         conn.commit()
@@ -66,18 +67,45 @@ class Storage:
             )
         conn.commit()
         conn.close()
-    def log_rollouts(self, run_id, step, group_id, rewards):
-        conn=sqlite3.connect(self.db_path)
-        cursor=conn.cursor()
+    def log_rollouts(
+        self,
+        run_id,
+        step,
+        group_id,
+        rewards,
+        responses,
+    ):
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+
         data = [
-            (run_id, step, group_id, i + 1, reward) 
-            for i, reward in enumerate(rewards)
-            ]
-    
-        cursor.executemany("""
-            INSERT INTO rollouts (run_id, step, group_id, rollout_id, reward)
-            VALUES (?, ?, ?, ?, ?)
-            """, data)
+            (
+                run_id,
+                step,
+                group_id,
+                i + 1,
+                reward,
+                response,
+            )
+            for i, (reward, response) in enumerate(
+                zip(rewards, responses)
+            )
+        ]
+        cursor.executemany(
+            """
+            INSERT INTO rollouts
+            (
+                run_id,
+                step,
+                group_id,
+                rollout_id,
+                reward,
+                response_text
+            )
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            data,
+        )
         conn.commit()
         conn.close()   
     def get_metrics(self,run_id,metric_name):
@@ -135,15 +163,24 @@ class Storage:
         conn.close()
         return row
     def get_rollouts(self, run_id, group_id):
-        conn=sqlite3.connect(self.db_path)
-        cursor=conn.cursor()
-        cursor.execute("""
-            SELECT reward FROM rollouts 
-            WHERE run_id = ? AND group_id = ?
-            ORDER BY rollout_id ASC
-            """, (run_id, group_id))
-        rows = [row[0] for row in cursor.fetchall()]
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+
+        cursor.execute(
+            """
+            SELECT reward, response_text
+            FROM rollouts
+            WHERE run_id = ?
+            AND group_id = ?
+            ORDER BY rollout_id
+            """,
+            (run_id, group_id),
+        )
+
+        rows = cursor.fetchall()
+
         conn.close()
+
         return rows
 
     def finish_run(self,run_id):
