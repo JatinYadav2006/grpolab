@@ -19,11 +19,7 @@ env/
 # VS Code
 .vscode/
 
-# OS files
-.DS_Store
-Thumbs.db
-
-# Python testing/cache
+# Python caches
 .pytest_cache/
 .mypy_cache/
 
@@ -31,3 +27,7 @@ Thumbs.db
 build/
 dist/
 *.egg-info/
+
+# OS files
+.DS_Store
+Thumbs.db
