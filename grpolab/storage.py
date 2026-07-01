@@ -190,6 +190,36 @@ class Storage:
         conn.close()
 
         return rows
+    
+    def get_prompt_history(self, run_id, prompt):
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            SELECT step, reward, response_text
+            FROM rollouts
+            WHERE run_id = ? AND prompt = ?
+            ORDER BY step ASC, rollout_id ASC
+            """,
+            (run_id, prompt),
+        )
+        rows = cursor.fetchall()
+        conn.close()
+        return [
+            {"step": step, "reward": reward, "response": response}
+            for step, reward, response in rows
+        ]
+
+    def get_unique_prompts(self, run_id):
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT DISTINCT prompt FROM rollouts WHERE run_id = ?",
+            (run_id,),
+        )
+        rows = cursor.fetchall()
+        conn.close()
+        return [row[0] for row in rows]
 
     def finish_run(self,run_id):
         conn=sqlite3.connect(self.db_path)

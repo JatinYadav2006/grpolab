@@ -62,3 +62,46 @@ class Analyzer:
                 "num_rollouts": len(rewards)
             }
         }
+    
+    def analyze_behavioral_evolution(self, run_id, prompt):
+        history = self.storage.get_prompt_history(run_id, prompt)
+
+        if not history:
+            return {
+                "status": "no_data",
+                "prompt": prompt,
+                "message": f"No rollout history found for this prompt in run {run_id}.",
+            }
+
+        earliest = history[0]
+        latest = history[-1]
+
+        reward_change = round(latest["reward"] - earliest["reward"], 4)
+
+        if abs(earliest["reward"]) > 1e-9:
+            reward_change_percent = round(
+                (reward_change / abs(earliest["reward"])) * 100, 1
+            )
+        else:
+            reward_change_percent = None
+
+        return {
+            "status": "success",
+            "prompt": prompt,
+            "earliest": {
+                "step": earliest["step"],
+                "reward": round(earliest["reward"], 4),
+                "response": earliest["response"],
+            },
+            "latest": {
+                "step": latest["step"],
+                "reward": round(latest["reward"], 4),
+                "response": latest["response"],
+            },
+            "learning_summary": {
+                "reward_change": reward_change,
+                "reward_change_percent": reward_change_percent,
+                "improved": reward_change > 0,
+                "steps_observed": latest["step"] - earliest["step"],
+            },
+        }
